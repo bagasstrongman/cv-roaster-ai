@@ -1,36 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CV Roaster</title>
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
   <div class="container mt-5">
     <h1 class="text-center title">
-        CV-Resume <span class="highlight"> Roaster🔥</span>
-      </h1>
-      <p class="text-center subtitle">Upload your CV/Resume in PDF format, and we'll roast it for you!</p>            
+      CV-Resume <span class="highlight"> Roaster🔥</span>
+    </h1>
+    <p class="text-center subtitle">
+      Slide in your CV/Resume as a <span class="highlight-red">PDF</span>, and we'll grill it to perfection!
+    </p>
+
+    <!-- Jumlah CV yang telah di-roast -->
+    <div class="row justify-content-center">
+      <div class="col-md-6 text-center mb-1">
+        <h6>CVs Sent to the Grill <span id="cvCount" class="highlight">0</span>🔥</h4>
+      </div>
+    </div>
 
     <!-- Form Upload CV -->
     <div class="row justify-content-center">
       <div class="col-md-6">
         <form id="uploadForm" enctype="multipart/form-data">
           <div class="mb-3">
-            <label for="cv" class="form-label custom-label">Upload your CV or Resume (PDF):</label>
-            <input class="form-control" type="file" id="cv" name="cv" accept=".pdf" required>
+            <label class="custom-label">Upload your CV or Resume (PDF):</label>
+            <div class="file-upload">
+              <input class="form-control" type="file" id="cv" name="cv" accept=".pdf" required onchange="updateFileName()">
+              <span class="file-upload-text">
+                <i class="fas fa-file-alt"></i> Choose or Drop document here
+              </span>                
+            </div>
           </div>
-          <button type="submit" class="btn btn-primary w-100">Give It a Roast!</button>
+          <button type="submit" class="btn btn-primary w-100" id="submitButton">
+            <span class="spinner-border spinner-border-sm d-none" id="loadingSpinner" role="status" aria-hidden="true"></span>
+            <span id="buttonText">Give It a Roast!!!</span>
+          </button>          
         </form>
       </div>
     </div>
-
+    
     <!-- Hasil Roasting -->
-    <div class="row justify-content-center mt-5">
-      <div class="col-md-8">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
         <div id="result" class="alert alert-success d-none" role="alert">
           <!-- Hasil roasting akan muncul di sini -->
         </div>
@@ -38,8 +58,17 @@
     </div>
   </div>
 
+  <!-- Footer -->
+  <footer>
+    <div class="text-center mt-3">
+      Made with 🍀 in Tangerang, Banten. Powered by <a href="https://www.linkedin.com/in/fly-morph-studio/"
+        target="_blank" class="highlight-green">FlyMorphStudio</a>
+    </div>
+  </footer>
+
   <!-- Bootstrap JS and dependencies -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
   <script src="script.js"></script>
 </body>
+
 </html>

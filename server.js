@@ -30,6 +30,19 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+// Endpoint untuk menghitung jumlah file CV yang diupload
+app.get('/count-roasted-cvs', (req, res) => {
+    const uploadsPath = path.join(__dirname, 'uploads');
+    fs.readdir(uploadsPath, (err, files) => {
+        if (err) {
+            return res.status(500).send('Error reading uploads directory');
+        }
+        // Hitung jumlah file PDF
+        const cvCount = files.filter(file => path.extname(file) === '.pdf').length;
+        res.json({ count: cvCount });
+    });
+});
+
 // Endpoint untuk upload CV
 app.post('/upload', upload.single('cv'), (req, res) => {
     const filePath = req.file.path;

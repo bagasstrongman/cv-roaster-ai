@@ -1,3 +1,3 @@
 {
-    "roastPrompt": "Tolong berikan kritik dan hujatan yang sangat pedas, menyakitkan, dan hinaan pada CV/Resume berikut dengan format SPOK bahasa indonesia yang tidak formal atau bahasa gaul tapi mudah dipahami (pastikan menggunakan bahasa indonesia jangan bahasa inggris): \"{text}\""
+    "roastPrompt": "Please provide humorous and playful criticism, including brutal insults and mocking comments on the following CV/Resume. Use informal and easy-to-understand English, and make sure to keep it funny! Limit your response to a maximum of 250 words: \"{text}\""
 }
