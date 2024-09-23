@@ -5,9 +5,17 @@ const pdf = require('pdf-parse');
 const path = require('path');
 const fs = require('fs');
 const Groq = require('groq-sdk');
+const { v2: cloudinary } = require('cloudinary');
 
 // Inisialisasi Groq dengan API Key
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
+// Konfigurasi Cloudinary
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 // Membaca prompt dari file JSON
 const prompts = JSON.parse(fs.readFileSync(path.join(__dirname, 'prompts.json'), 'utf-8'));
@@ -18,54 +26,39 @@ const PORT = process.env.PORT || 3000;
 // Middleware untuk menyajikan file statis dari folder 'public'
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Konfigurasi multer untuk menyimpan file upload
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${file.originalname}`);
-    },
-});
-
+// Konfigurasi multer tanpa menyimpan file ke disk lokal
+const storage = multer.memoryStorage(); // Menggunakan memory storage, bukan disk storage
 const upload = multer({ storage: storage });
-
-// Endpoint untuk menghitung jumlah file CV yang diupload
-app.get('/count-roasted-cvs', (req, res) => {
-    const uploadsPath = path.join(__dirname, 'uploads');
-    fs.readdir(uploadsPath, (err, files) => {
-        if (err) {
-            return res.status(500).send('Error reading uploads directory');
-        }
-        // Hitung jumlah file PDF
-        const cvCount = files.filter(file => path.extname(file) === '.pdf').length;
-        res.json({ count: cvCount });
-    });
-});
 
 // Endpoint untuk upload CV
 app.post('/upload', upload.single('cv'), (req, res) => {
-    const filePath = req.file.path;
+    if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded or file is not a PDF.' });
+    }
 
-    // Baca file PDF dan ekstrak teks
-    fs.readFile(filePath, (err, data) => {
-        if (err) {
-            return res.status(500).send('Error reading PDF file.');
+    // Upload file ke Cloudinary
+    cloudinary.uploader.upload_stream({ resource_type: 'raw' }, (error, result) => {
+        if (error) {
+            return res.status(500).json({ error: 'Error uploading file to Cloudinary: ' + error.message });
         }
 
-        pdf(data).then((result) => {
-            const extractedText = result.text;
+        // Baca file PDF dari URL yang sudah diupload ke Cloudinary
+        pdf(req.file.buffer).then((resultPDF) => {
+            const extractedText = resultPDF.text;
 
             // Kirim teks ke API Groq AI untuk di-roast
             roastCV(extractedText)
                 .then((roastedText) => {
-                    res.json({ roastedText });
+                    res.json({
+                        roastedText,
+                        cloudinaryUrl: result.secure_url // URL file yang diupload ke Cloudinary
+                    });
                 })
                 .catch((error) => {
-                    res.status(500).send('Error with Groq AI API: ' + error.message);
+                    res.status(500).json({ error: 'Error with Groq AI API: ' + error.message });
                 });
         });
-    });
+    }).end(req.file.buffer);
 });
 
 // Fungsi untuk mengirim teks ke API Groq AI dan mendapatkan hasil roasting
@@ -91,6 +84,25 @@ const roastCV = async (text) => {
         throw new Error(error.message);
     }
 };
+
+// Endpoint untuk menghitung jumlah CV yang telah di-roast
+app.get('/count-roasted-cvs', async (req, res) => {
+    try {
+        const result = await cloudinary.api.resources({
+            resource_type: 'raw',
+            type: 'upload',
+            prefix: '', // Prefix jika ada folder khusus
+            max_results: 500 // Limit hasil jika ada banyak file
+        });
+
+        // Mengirimkan jumlah file ke front-end
+        res.json({ count: result.resources.length });
+    } catch (error) {
+        console.error('Error fetching file count from Cloudinary:', error);
+        res.status(500).send('Error fetching file count.');
+    }
+});
+
 
 // Jalankan server
 app.listen(PORT, () => {
