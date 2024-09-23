@@ -17,6 +17,8 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
+console.log('Cloudinary Cloud Name:', process.env.CLOUDINARY_CLOUD_NAME);
+
 // Membaca prompt dari file JSON
 const prompts = JSON.parse(fs.readFileSync(path.join(__dirname, 'prompts.json'), 'utf-8'));
 
