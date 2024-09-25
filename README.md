@@ -21,7 +21,7 @@ The project is currently live! Try it out here: [CV-Resume Roaster](https://www.
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: Angular, Bootstrap
+- **Frontend**: Bootstrap
 - **Backend**: Node.js, Express.js
 - **AI Integration**: Groq AI
 - **Cloud Storage**: Cloudinary (for managing file uploads)
